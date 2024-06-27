@@ -1,12 +1,15 @@
 #!/bin/bash -ex
 ### Build a docker image for ubuntu i386.
+# Arguments, both optional:
+#  - suite (release codename): bionic=18.04 (default), focal=20.04, jammy=22.04, noble=24.04
+#  - arch: generally i386 (default) or x86_64
+suite=${1:-bionic}
+arch=${2:-i386}
 
 ### settings
-arch=i386
-suite=${1:-bionic}
-chroot_dir="/var/chroot/$suite"
+chroot_dir="/var/chroot/$suite-$arch"
 apt_mirror='http://archive.ubuntu.com/ubuntu'
-docker_image="32bit/ubuntu:$suite"
+docker_image="ubuntu-$suite-$arch"
 
 ### make sure that the required tools are installed
 packages="debootstrap schroot apparmor"
@@ -49,7 +52,7 @@ umount $chroot_dir/proc
 tar cfz ubuntu.tgz -C $chroot_dir .
 
 ### import this tar archive into a docker image:
-cat ubuntu.tgz | docker import - $docker_image --message "Build with https://github.com/docker-32bit/ubuntu"
+cat ubuntu.tgz | docker import - $docker_image --message "Built with https://github.com/sgilbertson/docker_ubuntu_script"
 
 # ### push image to Docker Hub
 # docker push $docker_image
